@@ -72,6 +72,8 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
+// (removed) Temporary debug route used during debugging
+
 // Admin routes (simple role-based)
 Route::middleware(['auth','is_admin'])
     ->prefix('admin')
@@ -83,4 +85,8 @@ Route::middleware(['auth','is_admin'])
         Route::get('/pendaftarans/{pendaftaran}/edit', [\App\Http\Controllers\Admin\PendaftaranController::class, 'edit'])->name('pendaftaran.edit');
         Route::put('/pendaftarans/{pendaftaran}', [\App\Http\Controllers\Admin\PendaftaranController::class, 'update'])->name('pendaftaran.update');
         Route::delete('/pendaftarans/{pendaftaran}', [\App\Http\Controllers\Admin\PendaftaranController::class, 'destroy'])->name('pendaftaran.destroy');
+        // Import / Export CSV
+        Route::get('/pendaftarans/export', [\App\Http\Controllers\Admin\ImportExportController::class, 'exportCsv'])->name('pendaftaran.export');
+        Route::post('/pendaftarans/export', [\App\Http\Controllers\Admin\ImportExportController::class, 'exportCsv'])->name('pendaftaran.export.post');
+        Route::post('/pendaftarans/import', [\App\Http\Controllers\Admin\ImportExportController::class, 'importCsv'])->name('pendaftaran.import');
     });

@@ -1,0 +1,3 @@
+id,nama_lengkap,nik,email,no_hp,tempat_lahir,tanggal_lahir,jenis_kelamin,alamat,fakultas,program_studi,status_pendaftaran
+2,"Muhammad Ajam Jamaludin",3207040102050001,muajad01@gmail.com,081232345676,Ciamis,2005-02-01,Laki-laki,"Jl. xxx",komputer,si,selesai
+4,"Freya Jaya Wardana",0102030406004002,freya@gmail.com,081232345634,Bandung,2007-02-01,Perempuan,"Jl. Braga",komputer,si,data_diri
