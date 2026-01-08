@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class PendaftaranController extends Controller
 {
@@ -22,28 +24,57 @@ class PendaftaranController extends Controller
     {
         $user = Auth::user();
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:255',
             'nik' => 'required|digits:16|unique:pendaftarans,nik,' . optional($user->pendaftaran)->id,
             'no_hp' => 'required|string|max:20',
+            'tempat_lahir' => 'nullable|string|max:255',
+            'tanggal_lahir' => 'nullable|date',
+            'jenis_kelamin' => 'nullable|string|in:Laki-laki,Perempuan',
+            'alamat' => 'nullable|string',
         ]);
 
-        // create atau update (AMAN UNTUK MULTI STEP)
-        Pendaftaran::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'nama_lengkap' => $request->nama_lengkap,
-                'nik'          => $request->nik,
-                'no_hp'        => $request->no_hp,
-            ]
-        );
+        if ($validator->fails()) {
+            Log::info('Pendaftaran: validasi data diri gagal', [
+                'user_id' => optional($user)->id,
+                'input' => $request->only(['nama_lengkap', 'nik', 'no_hp']),
+                'errors' => $validator->errors()->toArray(),
+            ]);
 
-        // update status
-        $user->update([
-            'status_pendaftaran' => 'data_diri',
-        ]);
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
-        return redirect()->route('pendaftaran.prodi');
+        try {
+            // create atau update (AMAN UNTUK MULTI STEP)
+            Pendaftaran::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'nik'          => $request->nik,
+                    'no_hp'        => $request->no_hp,
+                    'tempat_lahir' => $request->tempat_lahir,
+                    'tanggal_lahir' => $request->tanggal_lahir,
+                    'jenis_kelamin' => $request->jenis_kelamin,
+                    'alamat' => $request->alamat,
+                ]
+            );
+
+            // update status
+            $user->update([
+                'status_pendaftaran' => 'data_diri',
+            ]);
+
+            return redirect()->route('pendaftaran.prodi');
+
+        } catch (\Throwable $e) {
+            Log::error('Pendaftaran: gagal menyimpan data diri', [
+                'user_id' => optional($user)->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan data. Coba lagi atau hubungi admin.');
+        }
     }
 
     /**
@@ -59,16 +90,20 @@ class PendaftaranController extends Controller
             return redirect()->route('pendaftaran.create');
         }
 
-        return view('pendaftaran.prodi');
+        // ambil daftar fakultas beserta prodi
+        $fakultas = \App\Models\Fakultas::with('programStudis')->get();
+
+        return view('pendaftaran.prodi', compact('fakultas'));
     }
 
     public function storeProdi(Request $request)
     {
         $user = Auth::user();
 
+        // Accept either integer IDs (normal flow) or string names (fallback when DB is empty)
         $request->validate([
-            'fakultas' => 'required|integer',
-            'prodi'    => 'required|integer',
+            'fakultas' => 'required',
+            'prodi'    => 'required',
         ]);
 
         $pendaftaran = $user->pendaftaran;
@@ -77,10 +112,49 @@ class PendaftaranController extends Controller
             return redirect()->route('pendaftaran.create');
         }
 
-        $pendaftaran->update([
-            'fakultas_id'       => $request->fakultas,
-            'program_studi_id' => $request->prodi,
-        ]);
+
+        // Determine Fakultas ID and ProgramStudi ID. If DB has records, posted values should be IDs.
+        try {
+            $fakultasId = null;
+            $prodiId = null;
+
+            // if posted fakultas is numeric and exists, use it
+            if (is_numeric($request->fakultas) && \App\Models\Fakultas::where('id', $request->fakultas)->exists()) {
+                $fakultasId = (int) $request->fakultas;
+            } else {
+                // create or find by name (fallback)
+                $f = \App\Models\Fakultas::firstOrCreate([
+                    'nama_fakultas' => $request->fakultas,
+                ]);
+                $fakultasId = $f->id;
+            }
+
+            // program studi: if numeric and exists, use it
+            if (is_numeric($request->prodi) && \App\Models\ProgramStudi::where('id', $request->prodi)->exists()) {
+                $prodiId = (int) $request->prodi;
+            } else {
+                // create or find by name under the fakultas
+                $p = \App\Models\ProgramStudi::firstOrCreate([
+                    'fakultas_id' => $fakultasId,
+                    'nama_prodi' => $request->prodi,
+                ]);
+                $prodiId = $p->id;
+            }
+
+            $pendaftaran->update([
+                'fakultas_id'       => $fakultasId,
+                'program_studi_id' => $prodiId,
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::error('Pendaftaran: gagal menyimpan prodi', [
+                'user_id' => optional($user)->id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan pilihan Program Studi.');
+        }
 
         $user->update([
             'status_pendaftaran' => 'prodi',

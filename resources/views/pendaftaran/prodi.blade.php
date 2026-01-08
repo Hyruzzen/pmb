@@ -49,8 +49,14 @@
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300
                                        focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
                                 <option value="">-- Pilih Fakultas --</option>
-                                <option value="komputer">Fakultas Ilmu Komputer</option>
-                                <option value="ekonomi">Fakultas Ekonomi</option>
+                                @if(isset($fakultas) && $fakultas->isNotEmpty())
+                                    @foreach($fakultas as $f)
+                                        <option value="{{ $f->id }}">{{ $f->nama_fakultas }}</option>
+                                    @endforeach
+                                @else
+                                    <option value="komputer">Fakultas Ilmu Komputer</option>
+                                    <option value="ekonomi">Fakultas Ekonomi</option>
+                                @endif
                             </select>
                         </div>
 
@@ -96,16 +102,26 @@
         const prodi = document.getElementById('prodi');
 
         const dataProdi = {
-            komputer: [
-                'Sistem Informasi',
-                'Komputerisasi Akuntansi',
-                'Bisnis Digital'
-            ],
-            ekonomi: [
-                'Manajemen',
-                'Akuntansi',
-                'Ekonomi Pembangunan'
-            ]
+            @if(isset($fakultas) && $fakultas->isNotEmpty())
+                @foreach($fakultas as $f)
+                    {{ $f->id }}: [
+                        @foreach($f->programStudis as $p)
+                            { id: {{ $p->id }}, name: "{!! addslashes($p->nama_prodi) !!}" },
+                        @endforeach
+                    ],
+                @endforeach
+            @else
+                komputer: [
+                    { id: 'si', name: "Sistem Informasi" },
+                    { id: 'ka', name: "Komputerisasi Akuntansi" },
+                    { id: 'bd', name: "Bisnis Digital" },
+                ],
+                ekonomi: [
+                    { id: 'man', name: "Manajemen" },
+                    { id: 'ak', name: "Akuntansi" },
+                    { id: 'ekp', name: "Ekonomi Pembangunan" },
+                ],
+            @endif
         };
 
         fakultas.addEventListener('change', function () {
@@ -115,8 +131,8 @@
             if (dataProdi[this.value]) {
                 dataProdi[this.value].forEach(item => {
                     const opt = document.createElement('option');
-                    opt.value = item;
-                    opt.textContent = item;
+                    opt.value = item.id;
+                    opt.textContent = item.name;
                     prodi.appendChild(opt);
                 });
 

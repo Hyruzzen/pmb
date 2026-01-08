@@ -19,6 +19,12 @@
                 <form method="POST" action="{{ route('pendaftaran.store') }}">
                     @csrf
 
+                    @if(session('error'))
+                        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                         {{-- Nama Lengkap --}}
@@ -104,6 +110,18 @@
                                    value="{{ old('no_hp') }}"
                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 transition duration-200">
                             @error('no_hp')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Alamat --}}
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Alamat
+                            </label>
+                            <textarea name="alamat" rows="3"
+                                      class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 transition duration-200">{{ old('alamat') }}</textarea>
+                            @error('alamat')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
