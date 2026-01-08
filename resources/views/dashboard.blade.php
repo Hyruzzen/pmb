@@ -12,7 +12,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-gray-600 text-sm font-medium">Status Pendaftaran</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-2">{{ auth()->user()->status_pendaftaran ?? 'Belum Dimulai' }}</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-2">{{ auth()->user()->fresh()->status_pendaftaran ?? 'Belum Dimulai' }}</p>
                         </div>
                         <div class="bg-blue-100 p-4 rounded-full">
                             <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -48,26 +48,37 @@
             <div class="bg-white rounded-lg shadow-lg p-8">
                 <h2 class="text-xl font-bold text-blue-900 mb-6">Progress Pendaftaran</h2>
             
+                @php
+                    $status = auth()->user()->fresh()->status_pendaftaran;
+                    $steps = [
+                        'data_diri' => 'Data Diri',
+                        'prodi' => 'Program Studi',
+                        'berkas' => 'Upload Berkas',
+                        'selesai' => 'Konfirmasi'
+                    ];
+                    $stepOrder = ['data_diri', 'prodi', 'berkas', 'selesai'];
+                    $currentIndex = array_search($status, $stepOrder);
+                @endphp
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div class="flex items-center gap-3 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                        <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                        <span class="font-medium text-green-900">Data Diri</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-300">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9a2 2 0 104 0A2 2 0 005 9z"></path></svg>
-                        <span class="font-medium text-gray-600">Program Studi</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-300">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9a2 2 0 104 0A2 2 0 005 9z"></path></svg>
-                        <span class="font-medium text-gray-600">Upload Berkas</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-300">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9a2 2 0 104 0A2 2 0 005 9z"></path></svg>
-                        <span class="font-medium text-gray-600">Konfirmasi</span>
-                    </div>
+                    @foreach($stepOrder as $index => $stepKey)
+                        @php
+                            $isCompleted = $currentIndex !== false && $index <= $currentIndex;
+                            $isCurrent = $index === $currentIndex;
+                        @endphp
+                        <div class="flex items-center gap-3 p-4 rounded-lg border-l-4 {{ $isCompleted ? 'bg-green-50 border-green-500' : 'bg-blue-50 border-blue-300' }}">
+                            @if($isCompleted)
+                                <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span class="font-medium text-green-900">{{ $steps[$stepKey] }}</span>
+                            @else
+                                <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9a2 2 0 104 0A2 2 0 005 9z"></path></svg>
+                                <span class="font-medium text-gray-600">{{ $steps[$stepKey] }}</span>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
 
-                @if(auth()->user()->status_pendaftaran === 'selesai')
+                @if(auth()->user()->fresh()->status_pendaftaran === 'selesai')
                     <div class="bg-green-50 border border-green-200 rounded-lg p-6 flex items-start gap-4 mb-6">
                         <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                         <div>
@@ -75,9 +86,9 @@
                             <p class="text-green-700 text-sm mt-1">Terima kasih telah menyelesaikan proses pendaftaran. Silakan tunggu pengumuman hasil seleksi.</p>
                         </div>
                     </div>
-                @elseif(auth()->user()->status_pendaftaran)
+                @elseif(auth()->user()->fresh()->status_pendaftaran)
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-                        <p class="text-gray-700">Anda sedang berada di tahap <strong class="text-blue-600">{{ auth()->user()->status_pendaftaran }}</strong>.</p>
+                        <p class="text-gray-700">Anda sedang berada di tahap <strong class="text-blue-600">{{ auth()->user()->fresh()->status_pendaftaran }}</strong>.</p>
                         <a href="{{ route('pendaftaran.create') }}" class="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">Lanjutkan Pendaftaran</a>
                     </div>
                 @else

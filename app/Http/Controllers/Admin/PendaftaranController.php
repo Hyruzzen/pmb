@@ -47,6 +47,13 @@ class PendaftaranController extends Controller
 
     public function destroy(Pendaftaran $pendaftaran)
     {
+        // Reset status user sebelum delete
+        if ($pendaftaran->user) {
+            $pendaftaran->user->update([
+                'status_pendaftaran' => 'baru'
+            ]);
+        }
+        
         $pendaftaran->delete();
         return redirect()->route('admin.pendaftaran.index')->with('success','Deleted');
     }

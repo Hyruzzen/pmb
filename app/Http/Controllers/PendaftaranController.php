@@ -56,10 +56,11 @@ class PendaftaranController extends Controller
                     'tanggal_lahir' => $request->tanggal_lahir,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'alamat' => $request->alamat,
+                    'status_pendaftaran' => 'data_diri',
                 ]
             );
 
-            // update status
+            // update status di user
             $user->update([
                 'status_pendaftaran' => 'data_diri',
             ]);
@@ -156,6 +157,7 @@ class PendaftaranController extends Controller
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan pilihan Program Studi.');
         }
 
+        $pendaftaran->update(['status_pendaftaran' => 'prodi']);
         $user->update([
             'status_pendaftaran' => 'prodi',
         ]);
@@ -197,9 +199,10 @@ class PendaftaranController extends Controller
         }
 
         $pendaftaran->update([
-            'file_ktp'    => $request->file('ktp')->store('berkas/ktp'),
-            'file_ijazah' => $request->file('ijazah')->store('berkas/ijazah'),
-            'pas_foto'    => $request->file('pas_foto')->store('berkas/pas_foto'),
+            'file_ktp'    => $request->file('ktp')->store('berkas/ktp', 'public'),
+            'file_ijazah' => $request->file('ijazah')->store('berkas/ijazah', 'public'),
+            'pas_foto'    => $request->file('pas_foto')->store('berkas/pas_foto', 'public'),
+            'status_pendaftaran' => 'berkas',
         ]);
 
         $user->update([
@@ -223,6 +226,13 @@ class PendaftaranController extends Controller
             return redirect()->route('dashboard');
         }
 
+        $pendaftaran = $user->pendaftaran;
+        if ($pendaftaran) {
+            $pendaftaran->update([
+                'status_pendaftaran' => 'selesai',
+            ]);
+        }
+        
         $user->update([
             'status_pendaftaran' => 'selesai',
         ]);
