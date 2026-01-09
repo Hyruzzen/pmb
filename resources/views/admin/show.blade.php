@@ -93,6 +93,8 @@
             <div class="mt-6 flex gap-3">
                 <a href="{{ route('admin.pendaftaran.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition">Kembali</a>
                 <a href="{{ route('admin.pendaftaran.edit', $pendaftaran) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">Edit</a>
+                <a href="{{ route('admin.pendaftaran.kartu.pdf', $pendaftaran->id) }}"class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">Cetak KRS (PDF)</a>
+
             </div>
         </div>
     </div>

@@ -33,12 +33,12 @@ class Pendaftaran extends Model
     }
 
     public function fakultas(): BelongsTo
-    {
-        return $this->belongsTo(Fakultas::class);
-    }
+{
+    return $this->belongsTo(Fakultas::class, 'fakultas_id', 'id');
+}
 
-    public function programStudi(): BelongsTo
-    {
-        return $this->belongsTo(ProgramStudi::class);
-    }
+public function programStudi(): BelongsTo
+{
+    return $this->belongsTo(ProgramStudi::class, 'program_studi_id', 'id');
+}
 }

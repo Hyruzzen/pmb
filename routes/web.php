@@ -4,6 +4,7 @@ use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,29 @@ Route::middleware(['auth','is_admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('admin.dashboard');
+
+        Route::get('/dashboard/chart', [AdminDashboardController::class, 'chartData']);
+
+Route::get('/dashboard/gender-chart', [AdminDashboardController::class, 'genderChart']);
+
+
+        //pdf
+Route::get(
+    '/pendaftarans/{pendaftaran}/kartu-pdf',
+    [\App\Http\Controllers\Admin\PendaftaranController::class, 'cetakKartu']
+)->name('pendaftaran.kartu.pdf');
+Route::get(
+    '/pendaftarans/{pendaftaran}/krs-pdf',
+    [\App\Http\Controllers\Admin\PendaftaranController::class, 'cetakKrs']
+)->name('pendaftaran.krs.pdf');
+
+        Route::get(
+    '/pendaftarans/pdf',
+    [\App\Http\Controllers\Admin\PendaftaranController::class, 'downloadPdf']
+)->name('pendaftaran.pdf');
         Route::get('/', [\App\Http\Controllers\Admin\PendaftaranController::class, 'index'])->name('pendaftaran.index');
         Route::get('/pendaftarans/data', [\App\Http\Controllers\Admin\PendaftaranController::class, 'data'])->name('pendaftaran.data');
         Route::get('/pendaftarans/{pendaftaran}', [\App\Http\Controllers\Admin\PendaftaranController::class, 'show'])->name('pendaftaran.show');
@@ -89,4 +113,14 @@ Route::middleware(['auth','is_admin'])
         Route::get('/pendaftarans/export', [\App\Http\Controllers\Admin\ImportExportController::class, 'exportCsv'])->name('pendaftaran.export');
         Route::post('/pendaftarans/export', [\App\Http\Controllers\Admin\ImportExportController::class, 'exportCsv'])->name('pendaftaran.export.post');
         Route::post('/pendaftarans/import', [\App\Http\Controllers\Admin\ImportExportController::class, 'importCsv'])->name('pendaftaran.import');
-    });
+      
+        });
+
+    Route::get('/tes-admin', function () {
+    return 'ADMIN GROUP MASUK';
+});
+
+
+
+
+

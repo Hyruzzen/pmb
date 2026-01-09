@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pendaftaran;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 
 class PendaftaranController extends Controller
 {
@@ -57,4 +60,41 @@ class PendaftaranController extends Controller
         $pendaftaran->delete();
         return redirect()->route('admin.pendaftaran.index')->with('success','Deleted');
     }
+public function cetakKartu(Pendaftaran $pendaftaran)
+{
+    // WAJIB
+    $pendaftaran->load(['fakultas', 'programStudi']);
+
+    $noDaftar = 'PMB-' . str_pad($pendaftaran->id, 6, '0', STR_PAD_LEFT);
+
+    $qr = base64_encode(
+        QrCode::format('svg')
+            ->size(120)
+            ->generate($noDaftar)
+    );
+
+    // FOTO MAHASISWA (BASE64)
+    $fotoBase64 = null;
+
+    if ($pendaftaran->pas_foto) {
+        $fullPath = public_path('storage/' . $pendaftaran->pas_foto);
+
+        if (file_exists($fullPath)) {
+            $type = pathinfo($fullPath, PATHINFO_EXTENSION);
+            $data = file_get_contents($fullPath);
+            $fotoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        }
+    }
+
+    // Generate PDF
+    $pdf = Pdf::loadView('admin.pdf.kartu-pendaftaran', [
+        'pendaftaran' => $pendaftaran,
+        'noDaftar'    => $noDaftar,
+        'qr'          => $qr,
+        'foto'        => $fotoBase64,
+    ]);
+
+    return $pdf->download('Kartu-PMB-' . $pendaftaran->nama_lengkap . '.pdf');
+}
+
 }
