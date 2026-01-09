@@ -1,2 +1,7 @@
 membuat akun menjadi admin
 php scripts/make_admin.php --email=mahasiswa@gmail.com
+
+commit dan push
+git add .
+git commit -m "perbaiki foto"
+git push -u origin main
