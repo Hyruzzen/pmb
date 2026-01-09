@@ -4,7 +4,7 @@
 
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-blue-900">Dashboard Admin</h1>
-                <p class="text-blue-600 mt-1">Kelola data pendaftar calon mahasiswa</p>
+                <p class="text-blue-600 mt-1">Kelola data pendaftar calon mahasiswa</p>           
             </div>
 
             <div class="mb-4 flex items-center justify-between gap-4">

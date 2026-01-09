@@ -12,11 +12,18 @@
                 <div class="mb-8 flex flex-col items-center">
                     <h3 class="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-4">Pas Foto Mahasiswa</h3>
                     <div class="w-40 h-56 bg-gray-100 rounded-lg overflow-hidden shadow-md border-4 border-blue-200">
-                        <img src="/storage/{{ $pendaftaran->pas_foto }}" 
-                             alt="Foto {{ $pendaftaran->nama_lengkap }}"
-                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22280%22><rect fill=%22%23f3f4f6%22 width=%22200%22 height=%22280%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22sans-serif%22 font-size=%2214%22 fill=%22%239ca3af%22>Foto tidak ditemukan</text></svg>'"
-                             class="w-full h-full object-cover">
+                        @if($pendaftaran->pas_foto)
+                            <img src="{{ Storage::url($pendaftaran->pas_foto) }}" 
+                                 alt="Foto {{ $pendaftaran->nama_lengkap }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('images/default-avatar.png') }}" 
+                                 alt="Default Foto"
+                                 class="w-full h-full object-cover">
+                        @endif
                     </div>
+                    <p class="text-xs text-gray-400 mt-2 break-all">{{ $pendaftaran->pas_foto ?? 'Belum ada foto' }}</p>
+                </div>
                     <p class="text-xs text-gray-400 mt-2 break-all">{{ $pendaftaran->pas_foto }}</p>
                 </div>
                 <hr class="my-6">

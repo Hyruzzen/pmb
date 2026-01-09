@@ -1,0 +1,2 @@
+membuat akun menjadi admin
+php scripts/make_admin.php --email=mahasiswa@gmail.com
