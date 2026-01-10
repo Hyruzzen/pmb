@@ -1,0 +1,18 @@
+//membuat akun menjadi admin
+php scripts/make_admin.php --email=mahasiswa@gmail.com
+
+//membuat env
+cp .env.example .env
+
+php artisan key:generate
+composer install
+npm install
+npm run dev
+php artisan migrate
+
+
+//commit dan push
+git add .
+git commit -m "perbaiki foto"
+git push -u origin main
+
